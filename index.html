@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Image to Text</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="hero">
+        <p class="kicker">Image to Text</p>
+        <h1>Extract text from images in your browser.</h1>
+        <p class="sub">Upload a photo or paste an image. OCR runs locally in your browser using Tesseract.js.</p>
+      </header>
+
+      <section class="panel">
+        <div class="dropzone" id="dropzone" aria-label="Image dropzone">
+          <input type="file" id="fileInput" accept="image/*" hidden />
+          <div class="dropzone-content">
+            <div class="drop-icon" aria-hidden="true">TXT</div>
+            <p class="drop-title">Drop an image here</p>
+            <p class="drop-sub">or click to upload</p>
+            <button class="ghost" id="uploadBtn" type="button">Choose Image</button>
+          </div>
+          <img id="preview" alt="Selected preview" />
+        </div>
+
+        <div class="controls">
+          <label class="control">
+            <span>Language</span>
+            <select id="langSelect">
+              <option value="eng" selected>English</option>
+              <option value="spa">Spanish</option>
+              <option value="fra">French</option>
+              <option value="deu">German</option>
+              <option value="ita">Italian</option>
+              <option value="por">Portuguese</option>
+            </select>
+          </label>
+
+          <label class="control">
+            <span>Confidence filter</span>
+            <input type="range" id="confidence" min="0" max="100" value="60" />
+            <output id="confidenceValue">60</output>
+          </label>
+
+          <button class="primary" id="extractBtn" type="button" disabled>Extract Text</button>
+        </div>
+      </section>
+
+      <section class="panel output">
+        <div class="output-header">
+          <h2>Extracted Text</h2>
+          <div class="output-actions">
+            <button class="ghost" id="copyBtn" type="button" disabled>Copy</button>
+            <button class="ghost" id="downloadBtn" type="button" disabled>Download .txt</button>
+            <button class="ghost" id="clearBtn" type="button">Clear</button>
+          </div>
+        </div>
+
+        <div class="status" id="status">Drop an image to get started.</div>
+        <div class="progress" aria-hidden="true">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <textarea id="output" placeholder="Your text will appear here..." rows="12"></textarea>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>OCR runs locally in your browser. No uploads to a server.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
