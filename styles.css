@@ -1,12 +1,12 @@
 :root {
-  --paper: #f6f2e9;
-  --ink: #1c1b18;
-  --muted: #6e675d;
-  --accent: #e1671a;
-  --accent-dark: #ba4d0f;
-  --soft: #efe7da;
-  --line: #d7cbb8;
-  --shadow: 0 20px 40px rgba(20, 18, 12, 0.18);
+  --paper: #b6a6d6;
+  --ink: #2d223a;
+  --muted: #7a6e9b;
+  --accent: #a18ad6;
+  --accent-dark: #6c4fa1;
+  --soft: #d6c6f6;
+  --line: #a18ad6;
+  --shadow: 0 20px 40px rgba(44, 34, 58, 0.18);
 }
 
 * {
@@ -17,7 +17,7 @@ body {
   margin: 0;
   font-family: "Georgia", "Times New Roman", serif;
   color: var(--ink);
-  background: radial-gradient(circle at top, #fff9ef, var(--paper));
+  background: var(--paper);
 }
 
 .app {

@@ -10,20 +10,21 @@
     <main class="app">
       <header class="hero">
         <p class="kicker">Image to Text</p>
-        <h1>Extract text from images in your browser.</h1>
+        <h1>Extract some truckload of shit of text in your browser!!!!</h1>
         <p class="sub">Upload a photo or paste an image. OCR runs locally in your browser using Tesseract.js.</p>
+        <p class="sub" style="color:#7a6e9b;font-size:1.05rem;margin-top:6px;">You can add multiple images at once!!!! YEY!</p>
       </header>
 
       <section class="panel">
         <div class="dropzone" id="dropzone" aria-label="Image dropzone">
-          <input type="file" id="fileInput" accept="image/*" hidden />
+          <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" />
           <div class="dropzone-content">
-            <div class="drop-icon" aria-hidden="true">TXT</div>
+            <img src="HertaSpinning.gif" class="drop-icon" alt="Drop image icon" style="width:72px;height:72px;border-radius:50%;background:var(--accent);object-fit:cover;" />
             <p class="drop-title">Drop an image here</p>
             <p class="drop-sub">or click to upload</p>
             <button class="ghost" id="uploadBtn" type="button">Choose Image</button>
           </div>
-          <img id="preview" alt="Selected preview" />
+          <div id="previewList" style="display:flex;gap:12px;flex-wrap:wrap;"></div>
         </div>
 
         <div class="controls">
@@ -61,6 +62,7 @@
 
         <div class="status" id="status">Drop an image to get started.</div>
         <div class="progress" aria-hidden="true">
+          <img src="HertaSpinning.gif" id="progressImg" alt="Loading..." style="display:none;width:96px;height:96px;margin:auto;" />
           <div class="progress-bar" id="progressBar"></div>
         </div>
 

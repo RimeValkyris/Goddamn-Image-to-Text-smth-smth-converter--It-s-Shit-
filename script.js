@@ -1,12 +1,13 @@
 const dropzone = document.getElementById("dropzone");
 const fileInput = document.getElementById("fileInput");
 const uploadBtn = document.getElementById("uploadBtn");
-const preview = document.getElementById("preview");
+const previewList = document.getElementById("previewList");
 const extractBtn = document.getElementById("extractBtn");
 const output = document.getElementById("output");
 const statusText = document.getElementById("status");
-const progressBar = document.getElementById("progressBar");
 const progressWrap = document.querySelector(".progress");
+const progressImg = document.getElementById("progressImg");
+const progressBar = document.getElementById("progressBar");
 const copyBtn = document.getElementById("copyBtn");
 const downloadBtn = document.getElementById("downloadBtn");
 const clearBtn = document.getElementById("clearBtn");
@@ -14,7 +15,7 @@ const langSelect = document.getElementById("langSelect");
 const confidence = document.getElementById("confidence");
 const confidenceValue = document.getElementById("confidenceValue");
 
-let currentImageFile = null;
+let currentImageFiles = [];
 
 const setStatus = (message) => {
   statusText.textContent = message;
@@ -22,7 +23,18 @@ const setStatus = (message) => {
 
 const setProgress = (value) => {
   progressBar.style.width = `${value}%`;
-  progressWrap.style.display = value > 0 && value < 100 ? "block" : "none";
+  if (value > 0 && value < 100) {
+    progressWrap.style.display = "block";
+    progressImg.style.display = "block";
+    progressImg.style.visibility = "visible";
+    progressBar.style.display = "block";
+  } else {
+    progressWrap.style.display = value === 100 ? "block" : "none";
+    progressImg.style.display = "none";
+    progressImg.style.visibility = "hidden";
+    progressBar.style.display = value === 100 ? "block" : "none";
+    progressBar.style.width = value === 100 ? "100%" : "0%";
+  }
 };
 
 const enableOutputActions = (enabled) => {
@@ -31,36 +43,40 @@ const enableOutputActions = (enabled) => {
 };
 
 const resetPreview = () => {
-  preview.src = "";
-  preview.style.display = "none";
+  previewList.innerHTML = "";
   dropzone.querySelector(".dropzone-content").style.display = "grid";
   extractBtn.disabled = true;
 };
 
-const loadPreview = (file) => {
-  const reader = new FileReader();
-  reader.onload = (event) => {
-    preview.src = event.target.result;
-    preview.style.display = "block";
-    dropzone.querySelector(".dropzone-content").style.display = "none";
-    extractBtn.disabled = false;
-  };
-  reader.readAsDataURL(file);
+const loadPreviews = (files) => {
+  previewList.innerHTML = "";
+  dropzone.querySelector(".dropzone-content").style.display = "none";
+  extractBtn.disabled = false;
+  Array.from(files).forEach((file, idx) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = document.createElement("img");
+      img.src = event.target.result;
+      img.alt = `Preview ${idx + 1}`;
+      img.style.width = "96px";
+      img.style.height = "96px";
+      img.style.objectFit = "contain";
+      img.style.borderRadius = "12px";
+      img.style.border = "1px solid #a18ad6";
+      previewList.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
 };
 
 const handleFiles = (files) => {
-  const file = files[0];
-  if (!file) {
+  const validFiles = Array.from(files).filter((file) => file.type.startsWith("image/"));
+  if (validFiles.length === 0) {
+    setStatus("Please choose image files.");
     return;
   }
-
-  if (!file.type.startsWith("image/")) {
-    setStatus("Please choose an image file.");
-    return;
-  }
-
-  currentImageFile = file;
-  loadPreview(file);
+  currentImageFiles = validFiles;
+  loadPreviews(validFiles);
   setStatus("Ready to extract text.");
 };
 
@@ -92,51 +108,55 @@ confidence.addEventListener("input", () => {
 });
 
 extractBtn.addEventListener("click", async () => {
-  if (!currentImageFile) {
+  if (!currentImageFiles.length) {
     return;
   }
 
   output.value = "";
   enableOutputActions(false);
-  setProgress(0);
+  setProgress(1); // Show progress image immediately
   setStatus("Working on OCR... this can take a moment.");
 
-  try {
-    const { data } = await Tesseract.recognize(currentImageFile, langSelect.value, {
-      logger: (message) => {
-        if (message.status === "recognizing text") {
-          setProgress(Math.round(message.progress * 100));
-        }
-      },
-    });
+  let allText = "";
+  for (let i = 0; i < currentImageFiles.length; i++) {
+    try {
+      const { data } = await Tesseract.recognize(currentImageFiles[i], langSelect.value, {
+        logger: (message) => {
+          if (message.status === "recognizing text") {
+            setProgress(Math.round(message.progress * 100));
+          }
+        },
+      });
 
-    const minConfidence = Number(confidence.value);
-    const filteredLines = data.lines
-      .map((line) => {
-        const words = line.words || [];
-        const kept = words.filter((word) => word.confidence >= minConfidence);
-        const averageConfidence =
-          words.reduce((total, word) => total + word.confidence, 0) /
-          Math.max(words.length, 1);
+      const minConfidence = Number(confidence.value);
+      const filteredLines = data.lines
+        .map((line) => {
+          const words = line.words || [];
+          const kept = words.filter((word) => word.confidence >= minConfidence);
+          const averageConfidence =
+            words.reduce((total, word) => total + word.confidence, 0) /
+            Math.max(words.length, 1);
 
-        if (kept.length === 0 && averageConfidence < minConfidence) {
-          return "";
-        }
+          if (kept.length === 0 && averageConfidence < minConfidence) {
+            return "";
+          }
 
-        return (kept.length > 0 ? kept : words).map((word) => word.text).join(" ");
-      })
-      .filter((line) => line.trim().length > 0)
-      .join("\n");
+          return (kept.length > 0 ? kept : words).map((word) => word.text).join(" ");
+        })
+        .filter((line) => line.trim().length > 0)
+        .join("\n");
 
-    output.value = filteredLines.trim() || data.text.trim();
-    setStatus("Extraction complete.");
-    setProgress(100);
-    enableOutputActions(output.value.length > 0);
-  } catch (error) {
-    console.error(error);
-    setStatus("Something went wrong. Please try another image.");
-    setProgress(0);
+      allText += `--- Image ${i + 1} ---\n`;
+      allText += filteredLines.trim() || data.text.trim();
+      allText += "\n\n";
+    } catch (error) {
+      allText += `--- Image ${i + 1} ---\nError extracting text.\n\n`;
+    }
   }
+  output.value = allText.trim();
+  setStatus("Extraction complete.");
+  setProgress(100);
+  enableOutputActions(output.value.length > 0);
 });
 
 copyBtn.addEventListener("click", async () => {
@@ -161,7 +181,7 @@ downloadBtn.addEventListener("click", () => {
 });
 
 clearBtn.addEventListener("click", () => {
-  currentImageFile = null;
+  currentImageFiles = [];
   output.value = "";
   setStatus("Drop an image to get started.");
   setProgress(0);
@@ -169,4 +189,9 @@ clearBtn.addEventListener("click", () => {
   resetPreview();
 });
 
+// Remove progress bar logic
+// No progressBar element anymore
+
+// Show GIF only during OCR
+// Already handled by setProgress
 resetPreview();
