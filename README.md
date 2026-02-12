@@ -5,6 +5,7 @@ This was made because the Powerpoint presentation in some of my PPT given by the
 Some of the parts here are made by a Clanker yes you read it right a CLANKER AN AI BECAUSE THIS IS RUSHED I HAVE EXAMS TOMORROW AND I DIDNT COPY MY NOTES
 
 THIS JUST RUNS LOCALLY ON YOUR BROWSER IM TOO LAZY TO DEPLOY THIS PIECE OF SHIT
+Fucker needs some Improvement
 <div align="center">
   <a href="https://ibb.co/q3DhDDrd">
     <img src="https://i.ibb.co/cSyRyyr1/Screenshot-20260116-014021-You-Tube.jpg" 
